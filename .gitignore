@@ -1,0 +1,20 @@
+# 敏感数据与密钥（金融红线：永远不提交）
+.env
+*.key
+*.p12
+*.pfx
+secrets/
+
+# 可能含敏感数据的文件
+*.xlsx
+*.xls
+*.csv
+data/
+*.pdf
+
+# 系统与工具产物
+node_modules/
+.DS_Store
+Thumbs.db
+
+# 仅提交 index.html / index.md / README.md / LICENSE 等公开文档
