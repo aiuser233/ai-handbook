@@ -19,6 +19,8 @@
 | 第 6 章 | 安全、合规与伦理 | 数据边界、幻觉、个人信息、保密义务 |
 | 第 7 章 | 常见问题 FAQ | 高频疑问速查 |
 | 第 8 章 | 术语表 | 中英对照 Glossary |
+| 第 9 章 | 推荐 AI 使用平台 | Codex、Claude Code、ZCode、OpenCode、Cursor、Zed 选型 |
+| 第 10 章 | Skill 实例 | GitHub 热门 skill 仓库解读与安装安全红线 |
 | 附录 A | 提示词模板库 | 可直接套用的金融 prompt |
 | 附录 B | 工具清单与学习资源 | 选型参考 |
 
@@ -474,6 +476,162 @@ secrets/
 | Workers | 云函数 | Cloudflare 的按需代码运行 |
 | Skill | 技能 | 打包成可复用能力包(步骤+规则+工具) |
 | Hallucination | 幻觉 | 模型编造看似合理的内容 |
+
+---
+
+## 第 9 章 · 推荐的 AI 使用平台（2026 年盘点）
+
+> 对应第 1.4 节：**这些平台本质上都是"Harness + 模型"的成品**——模型决定能力上限，Harness 决定实际能发挥出多少。本章按"形态"分类，每个平台给：定位、亮点、金融人怎么选。
+
+### 9.0 平台形态速览（先建立地图）
+
+| 形态 | 代表 | 一句话 |
+|---|---|---|
+| 终端 CLI Agent | Codex CLI、Claude Code、OpenCode、Gemini CLI | 在终端里下任务，它读代码、改文件、跑命令 |
+| 桌面 ADE（Agentic 开发环境） | ZCode | 可视化"桌面工作台"，内置 Agent/终端/预览/Git，门槛最低 |
+| AI 原生 IDE | Cursor、Zed、Windsurf | 编辑器里直接干活，Tab 补全 + 多文件编辑 + 智能体面板 |
+| 云/委托执行 | Codex Web（chatgpt.com/codex） | 任务丢上云后台跑，手机看进度 |
+| 通用桌面助手 | 你现在用的这类 | 本地文件 + 工具 + skill，办公场景（写报告、管仓库、部署）一站式 |
+
+### 9.1 OpenAI Codex（CLI + 云端）
+
+- **定位**：OpenAI 官方编码 Agent，开源（Apache-2.0，Rust 编写），终端里规划/改代码/跑命令；长任务可"委托"给云端 Codex 后台跑完再拉回。
+- **亮点**：
+  - 终端 + IDE（VS Code/Cursor 插件）+ 桌面 App + 云端多形态。
+  - 支持 **skills 与 sub-agents**（并行子任务）；完整 MCP 支持。
+  - 与 ChatGPT 生态打通：Plus/Pro 订阅额度内使用，入门成本极低。
+  - 云端"异步执行"：提一个任务，该干别的干别的，回来验收。
+- **金融人视角**：开源可审计（Apache-2.0）是加分项；但数据走 OpenAI 云端，**敏感代码/数据需脱敏**或用私有部署的模型 API。
+
+### 9.2 Claude Code（Anthropic）
+
+- **定位**：终端编码 Agent 的标杆，"深度理解整个代码库再动手"的长自主会话能力最强。
+- **亮点**：
+  - 递归探索项目结构、读相关配置、建立上下文后再改——大型代码库重构/复杂项目尤强。
+  - 生态最大：**3000+ MCP 集成**、hooks、后台 sub-agents；skill 体系（第 4、10 章）的起点就是它。
+  - 支持 200K 上下文（1M beta）。
+- **金融人视角**：写"会跑代码、会查数据"的严肃任务（回测脚本、数据管道）首选之一；API 用量按 token 计费，大项目注意成本。
+
+### 9.3 ZCode（智谱 Z.ai）—— 国产 Harness 的代表
+
+- **定位**：智谱 Z.ai 的 **ADE（Agentic Development Environment）**，桌面应用，**针对 GLM 系列深度优化的国产 Coding Harness**，官方口径用户已破百万（2026-08）。
+- **核心逻辑**（值得记住）：*模型决定能力上限，Harness 负责上下文管理、工具调用、任务调度、缓存与结果校验*——同一模型在不同 Harness 里表现差异很大，ZCode 宣称 GLM 搭配 ZCode 的任务通过率显著高于搭配其他 Agent。
+- **亮点**：
+  - 深度适配 GLM-5.2 / GLM-5.3（**1M 上下文**），长程任务不丢连续性（目标、文件、终端结果、Git 状态在同一任务里保持）。
+  - 四大机制（2026-08 升级）：**Goal（目标模式，自主跑完复杂任务）、Subagents（子智能体并行）、Remote Control（远程/手机跟进）、闲时任务**。
+  - 桌面可视化：文件树 + Agent 对话 + 终端面板 + 内置浏览器预览 + 原生 Git，**命令行门槛最低**。
+  - 配套 **GLM Coding Plan** 订阅（额度制，国内网络直连、性价比高）；支持 MCP、skills。
+- **金融人视角**：
+  - 国内合规环境友好（无需翻墙、人民币计费、数据走国内通道）——相比 Codex/Claude Code，**数据出境顾虑最小**。
+  - 注意：ZCode 2026-09 曾发生用户代码数据上传争议（官方致歉并承诺开源代码库）——**任何工具都建议先开"沙箱/审批模式"跑，敏感仓库配好 `.gitignore`，重要数据不交给工具自动上传**。
+
+### 9.4 OpenCode（开源、可自托管）
+
+- **定位**：SST 团队出品的**开源（MIT）终端编码 Agent**，热度极高（150k+ stars 量级），"模型无关"（provider-agnostic）。
+- **亮点**：
+  - 自带免费模型入口；也可接 Claude / GPT / Gemini / 本地模型，75+ provider。
+  - 终端 TUI + 桌面 App（macOS/Windows/Linux）+ IDE 插件；LSP 支持。
+  - 隐私优先设计：可完全本地/自托管，支持 BYOK（自带 key）。
+- **金融人视角**：想"代码和数据全程不出本机"时的现实选择（配本地模型或私有化 API）；开源可审计。
+
+### 9.5 Cursor（AI 原生 IDE）
+
+- **定位**：VS Code 分叉，"编辑器里直接干活"体验最顺滑的日常主力。
+- **亮点**：自研 Tab 补全（行业标杆）+ Composer 多文件编辑 + 智能体模式；模型可选范围广。
+- **金融人视角**：写数据处理脚本、小工具的日常编辑体验最好；但它是闭源商业品（按席位订阅），代码默认走云端处理，敏感代码注意其隐私设置。
+
+### 9.6 Zed（Rust 写的 AI 编辑器）
+
+- **定位**：Atom 团队新作，**Rust + GPU 加速的开源编辑器**，AI 是一等公民而非插件。
+- **亮点**：Agentic Editing（把任务委派给 Agent，实时看它改代码、在统一 Diff 视图里审查）；**ACP（Agent Client Protocol）可接入外部 Agent：Claude Code、Codex、OpenCode 等**；多模型、MCP、本地模型都支持；多人协作。
+- **金融人视角**：开源 + 可本地模型 + 编辑器原生 AI，适合"想要轻、快、可自管"的场景。
+
+### 9.7 选型建议（金融从业者）
+
+| 场景 | 推荐 |
+|---|---|
+| 国内环境、日常主力、门槛最低 | **ZCode**（GLM 生态 + 订阅制 + 可视化） |
+| 写复杂量化/数据脚本、大代码库 | **Claude Code**（代码库理解最深） |
+| 想开源可审计、自托管 | **OpenCode** / **Zed** |
+| 要"提完任务就下班，云上跑" | **Codex（云端）** |
+| 编辑器内顺手补全 | **Cursor**（或 Zed） |
+| 办公全流程（文档/仓库/部署/表格） | 你现在用的这类**桌面 AI 助手**（本手册的"操作者"就是它） |
+
+**通用纪律**（呼应第 6 章）：无论用哪个平台——① 先开审批/沙箱模式；② 敏感仓库配好 `.gitignore`；③ 数值结果自己跑一遍验证；④ 订阅前看清数据政策与驻留地。
+
+---
+
+## 第 10 章 · Skill 实例：从 GitHub 找"现成高手"
+
+> 第 4 章讲了 skill 是什么，这一章带你**看真实的好用 skill**，体会它"装完就能按 SOP 干活"的威力。以下仓库均为公开仓库，**安装前务必先读一遍 `SKILL.md`**（见 10.7 安全红线）。
+
+### 10.1 官方示范：anthropics/skills
+
+- 地址：`github.com/anthropics/skills`
+- 内容：Anthropic 官方的 Agent Skills 示例库（Apache-2.0 开源），定义了 skill 的目录结构与 `SKILL.md` 规范（配套标准见 agentskills.io）。
+- 里面有什么：文档创建/编辑（Word、PPT、PDF、Excel 生成）、canvas-design（视觉设计）、slack-gif-creator、MCP server 生成、web 应用测试等。
+- **看它的价值**：学"官方认为的 skill 长什么样"——每个 skill 一个文件夹，`SKILL.md` 写指令 + 元数据，附脚本和资源。想自己写 skill（第 4 章），先抄它的结构。
+
+### 10.2 方法论全家桶：obra/superpowers（最火的社区 skill 框架）
+
+- 地址：`github.com/obra/superpowers`
+- 它是什么：**一套完整的"给编码 Agent 的软件开发方法论"**，由多个可组合 skill 构成。装完之后，你的 Agent 不再"上来就写代码"，而是：
+  1. 先反向追问你"到底要做什么"，把需求逼成一份可读的 **spec**；
+  2. 分块展示设计稿让你签字确认；
+  3. 写出"连没有判断力的初级工程师也能照做"的**实现计划**；
+  4. 执行时强制 **红/绿 TDD**（先写失败测试再写实现）、YAGNI、sub-agent 分工。
+- 为什么说它"强"：它改变的不是单点能力，而是 Agent 的**工作纪律**——头脑风暴、TDD、子智能体、失败恢复（"When Something Goes Wrong"流程）全被固化成 skill。多平台通用：Claude Code、Codex CLI/App、Cursor、OpenCode、Zed、Gemini CLI 等都能装。
+- **金融类比**：相当于给实习生发了一本《投研作业 SOP 手册》，他以后按手册干活，不再需要你逐条叮嘱。
+
+### 10.3 安全审计：trailofbits/skills
+
+- 地址：`github.com/trailofbits/skills`
+- 内容：安全公司 **Trail of Bits** 的 skill 市场（插件 marketplace）：智能合约审计、漏洞检测、安全测试与审计工作流。安装：`/plugin marketplace add trailofbits/skills`（Codex 也可直接加 marketplace）。
+- **看它的价值**：skill 可以是**行业专家知识**的载体——安全审计这种高度专业化的流程，被打包成 skill 后 Agent 就能按审计方法论执行。金融风控/合规同理：把"审查 SOP"做成 skill，是最有想象空间的应用（呼应 5.2）。
+
+### 10.4 合规保护：varlock 与 PII 脱敏类 skill
+
+- 例：`github.com/wrsmith108/varlock-claude-skill`——保证**密钥/敏感环境变量永不出现在 AI 会话、终端输出、日志或 git commit 中**。
+- 例：PII sanitize 类 skill——检测并自动打码 15+ 类个人敏感信息（SSN、账号等）。
+- **金融人应该优先装的类型就是这种**：先给 AI 套上"合规护栏"，再谈效率。它直接服务第 6 章的红线（数据不出界、密钥不落盘、客户信息不进日志）。
+
+### 10.5 找 skill 的地方（列表/目录类仓库）
+
+| 仓库 | 说明 |
+|---|---|
+| `ComposioHQ/awesome-claude-skills` | 精选 skill 列表，按工作流分类 |
+| `mejba13/awesome-claude-skills` / `tomchapin/awesome-claude-skills` | 社区 awesome 列表（含开发/业务自动化/内容/数据分析） |
+| `skills.sh` / `skillsmp` 等目录站 | 在线 skill 目录，可按场景搜 |
+| 各 Agent 官方 plugin marketplace | 如 Claude Code 的 `/plugin marketplace` |
+
+> 提醒：社区 skill 数量已数万级，**质量参差**，"awesome 列表"是起点不是标准，装之前读原文（10.7）。
+
+### 10.6 安装方式（通用三招）
+
+```text
+1) Agent 内建市场（最省心）
+   Claude Code:  /plugin marketplace add trailofbits/skills  → /plugin menu
+   Codex CLI:    codex plugin marketplace add trailofbits/skills
+2) 一行安装器
+   npx skills add anthropics/skills
+3) 手动（最透明，金融人推荐）
+   git clone 仓库 → 把目标 skill 文件夹拷到工具的技能目录
+   （Claude Code: ~/.claude/skills/；其他工具见其文档）
+   → 先通读 SKILL.md 与其中脚本，再启用
+```
+
+### 10.7 选 skill 的安全红线（金融从业者必读）
+
+1. **skill = 可执行的 SOP + 脚本**，它可能运行代码、发网络请求。装前必须读 `SKILL.md` 与所有附带脚本（相当于做"代码尽调"）。
+2. 只从**可溯源**的来源安装（官方、知名安全公司、高星仓库）；匿名仓库里的 skill 一律不装进生产环境。
+3. 含"自动上传/联网"行为的 skill，先在**无敏感数据的仓库/沙箱**里验证。
+4. 把"脱敏、密钥防护"类 skill 当作**基础设施**先装，再装效率类 skill。
+5. 自研 skill（第 4 章）注意其中写死的口径与流程本身也是公司资产，存放位置要符合保密级别。
+
+### 10.8 一句话体会 skill 的威力
+
+> Prompt 是"这一次怎么指挥它"；Skill 是"这一类事它永远这么干"。
+> 把团队最好的 SOP 变成 skill，等于把"资深员工的做法"复制给每一个 AI 工位——**可复用、可审计、可版本管理（放 git 里管）**。
 
 ---
 
