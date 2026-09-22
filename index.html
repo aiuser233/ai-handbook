@@ -76,6 +76,29 @@
       padding:2px 9px; border-radius:6px; cursor:pointer; opacity:0; transition:.15s; }
     pre:hover .copybtn { opacity:1; }
     .backtop { display:inline-block; margin-top:1rem; font-size:.8rem; color:var(--muted); text-decoration:none; }
+    /* ===== 批注角标 ===== */
+    .anno { position:relative; cursor:help; }
+    .anno::after { content:"①"; }
+    .anno[data-anno-i="2"]::after { content:"②"; }
+    .anno[data-anno-i="3"]::after { content:"③"; }
+    .anno[data-anno-i="4"]::after { content:"④"; }
+    .anno[data-anno-i="5"]::after { content:"⑤"; }
+    .anno[data-anno-i="6"]::after { content:"⑥"; }
+    .anno[data-anno-i="7"]::after { content:"⑦"; }
+    .anno[data-anno-i="8"]::after { content:"⑧"; }
+    .anno[data-anno-i="9"]::after { content:"⑨"; }
+    .anno[data-anno-i="10"]::after { content:"⑩"; }
+    .anno::after { position:absolute; top:-1.15em; left:0; margin-left:-1.25em;
+      font-size:.78em; color:var(--accent); font-weight:700; }
+    .anno::before { content:""; position:absolute; inset:-4px -6px; border-radius:6px; transition:.15s; }
+    .anno:hover::before { background:var(--accent-soft); }
+    /* 悬浮批注卡片（由 JS 挂到 body，定位到角标旁） */
+    .anno-pop { position:fixed; z-index:100; max-width:420px; display:none;
+      background:var(--card); color:var(--fg); border:1px solid var(--accent);
+      border-radius:10px; padding:.8rem 1rem; font-size:.9rem; line-height:1.65;
+      box-shadow:0 8px 24px rgba(0,0,0,.18); }
+    .anno-pop .ttl { font-weight:700; color:var(--accent); display:block; margin-bottom:.3rem; }
+    .anno-pop ul { margin:.35rem 0 0; padding-left:1.2rem; }
     @media (max-width:1000px) {
       .layout { grid-template-columns:1fr; }
       .sidebar { display:none; }
@@ -108,9 +131,32 @@
       <div id="doc" style="display:none"></div>
     </div>
   </div>
+  <div class="anno-pop" id="annoPop"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
+  /* ========= 批注定义（以后要加批注，只改这个数组） =========
+     anchor: 正文里出现过的短语（首次出现处插角标）
+     title / html: 悬浮显示内容（html 可用 <ul>/<b> 等简单标签）
+     注意：anchor 必须与 index.md 中的文字完全一致，写错了不会报错，只是不显示。 */
+  const ANNOS = [
+    {
+      anchor: '请输出 JSON，字段为',
+      title: '💡 批注：这个 JSON 示例好在哪',
+      html: `
+        <b>核心优势</b>：把 AI 输出从"给人看的段落"变成"给程序用的数据"。
+        <ul>
+          <li><b>机器可读</b>：输出可直接 <code>json.loads()</code> → <code>DataFrame</code> → Excel，"AI 提取 → 汇总 50 家 → 出对比表"全自动</li>
+          <li><b>口径统一</b>：字段固定 = 每家都是同样 5 列，批量结果能逐列横向比较</li>
+          <li><b>缺失显式</b>：约定"缺失填 null"，能区分"值为 0"和"未披露"——尽调/审计关键</li>
+          <li><b>可校验可审计</b>：配 JSON Schema 自动查字段齐全/类型；每条 JSON 存库留痕</li>
+          <li><b>Agent 通用接口</b>：function calling 的标准格式就是 JSON，后面接数据库、第二个 AI 核对、可视化看板都无障碍</li>
+        </ul>
+        <b>两个注意点</b>：① JSON 只管"结构"，不管"准确"——数字仍需对原文复核；② "一句话风险"这类自由文本字段要加约束（限字数、只写原文有的），否则模型会塞进发散内容。`
+    }
+  ];
+  /* ============================================================ */
+
   (async () => {
     const $ = s => document.querySelector(s);
 
@@ -218,6 +264,73 @@
           } catch (e) { btn.textContent = '复制失败'; }
         };
         pre.appendChild(btn);
+      });
+
+      /* ===== 批注引擎 =====
+         在正文中搜索 anchor 短语，用 <span class="anno"> 包住，
+         悬停/长按时显示 .anno-pop 卡片（fixed 定位到角标旁）。 */
+      const pop = $('#annoPop');
+      let usedIdx = [];
+      ANNOS.forEach((anno, i) => {
+        const found = wrapFirstMatch(doc, anno.anchor);
+        if (found) {
+          found.dataset.annoI = i + 1;
+          found.dataset.annoKey = i;
+          usedIdx.push(i);
+        } else {
+          console.warn('anno anchor not found:', anno.anchor);
+        }
+      });
+      function wrapFirstMatch(root, anchor) {
+        const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+          acceptNode(n) {
+            if (!n.nodeValue.includes(anchor)) return NodeFilter.FILTER_REJECT;
+            if (n.parentElement.closest('pre,script,.anno')) return NodeFilter.FILTER_REJECT;
+            return NodeFilter.FILTER_ACCEPT;
+          }
+        });
+        let node;
+        while ((node = walker.nextNode())) {
+          const idx = node.nodeValue.indexOf(anchor);
+          const textNode = node;
+          const span = document.createElement('span');
+          span.className = 'anno';
+          const before = textNode.nodeValue.slice(0, idx);
+          const after = textNode.nodeValue.slice(idx + anchor.length);
+          const parent = textNode.parentNode;
+          if (before) parent.insertBefore(document.createTextNode(before), textNode);
+          span.textContent = anchor;
+          parent.insertBefore(span, textNode);
+          if (after) parent.insertBefore(document.createTextNode(after), textNode);
+          parent.removeChild(textNode);
+          return span;
+        }
+        return null;
+      }
+      doc.querySelectorAll('.anno').forEach(sp => {
+        const show = () => {
+          const a = ANNOS[+sp.dataset.annoKey];
+          pop.innerHTML = '<span class="ttl">' + a.title + '</span>' + a.html;
+          pop.style.display = 'block';
+          const r = sp.getBoundingClientRect();
+          const vw = innerWidth, vh = innerHeight;
+          const pw = pop.offsetWidth, ph = pop.offsetHeight;
+          let top = r.bottom + 8, left = Math.max(12, Math.min(r.left, vw - pw - 12));
+          if (top + ph > vh - 8) top = Math.max(8, r.top - ph - 8);
+          pop.style.top = top + 'px';
+          pop.style.left = left + 'px';
+        };
+        const hide = () => { pop.style.display = 'none'; };
+        sp.addEventListener('mouseenter', show);
+        sp.addEventListener('mouseleave', hide);
+        sp.addEventListener('focus', show); sp.addEventListener('blur', hide);
+        sp.tabIndex = 0;
+        /* 触屏：点一下显示，再点一下关闭 */
+        sp.addEventListener('click', e => {
+          e.preventDefault();
+          pop.style.display === 'block' ? hide() : show();
+        });
+        addEventListener('scroll', hide, { passive: true });
       });
 
       /* 阅读进度条 */
