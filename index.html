@@ -153,6 +153,62 @@
           <li><b>Agent 通用接口</b>：function calling 的标准格式就是 JSON，后面接数据库、第二个 AI 核对、可视化看板都无障碍</li>
         </ul>
         <b>两个注意点</b>：① JSON 只管"结构"，不管"准确"——数字仍需对原文复核；② "一句话风险"这类自由文本字段要加约束（限字数、只写原文有的），否则模型会塞进发散内容。`
+    },
+    {
+      anchor: '（主分支）上保持',
+      title: '① 批注：这条是什么意思',
+      html: `
+        <b>main（主分支）</b>= 全团队共享的"已发布"基线，随时可打包、交付、上线。
+        <ul>
+          <li>"随时可交付的干净状态" = <b>main 上永远只放"能交付"的代码</b>，不直接在上面试验、乱改。</li>
+          <li>所有试验性的改动都先在"试验线"（feature 分支）上做，验收通过才合回 main。</li>
+          <li>类比：main 是"已签字定稿的研报"，只有审完的结论才写进去。</li>
+        </ul>`
+    },
+    {
+      anchor: '做新功能/新分析：',
+      title: '② 批注：这条是什么意思',
+      html: `
+        从 main 拉一条<b>试验线（feature 分支）</b>再动手：
+        <ul>
+          <li><code>git switch -c feature/xxx</code> = 新建一个名为 feature/xxx 的分支并<b>立刻切过去</b>（-c = create 的缩写）。</li>
+          <li>之后 <b>改代码 → commit（存档）→ push（推上 GitHub）</b>，全程在试验线上进行。</li>
+          <li>好处：这条线改崩了，main 完全不受影响，随时能丢弃重来。</li>
+          <li>分支名习惯：<code>feature/</code>（新功能）、<code>fix/</code>（修 bug）、<code>analysis/</code>（新分析）。</li>
+        </ul>`
+    },
+    {
+      anchor: '，让同事 review，通过后合并',
+      title: '③ 批注：这条是什么意思',
+      html: `
+        <b>Pull Request（PR，合并请求）</b>= 把试验线的改动"请求"合回 main 的<b>正式通道</b>：
+        <ul>
+          <li>你在 GitHub 上发起 PR 后，同事会看到<b>diff（改动对比）</b>，逐行 review、提意见、通过（approve）后才合并。</li>
+          <li>合并后 main 多了这批改动，所有人再 <code>git pull</code> 即可同步。</li>
+          <li>金融价值：PR 就是"<b>变更审批 + 留痕</b>"——谁提的、改了什么、谁批的、何时合的，平台全程记录，天然契合合规。</li>
+        </ul>`
+    },
+    {
+      anchor: '合并后删除临时分支',
+      title: '④ 批注：这条是什么意思',
+      html: `
+        试验线（feature 分支）使命完成，<b>删掉保持整洁</b>：
+        <ul>
+          <li>合并进 main 后，这条分支的改动已经"进家"了，留在本地/远端只是累赘，容易让分支列表越来越乱。</li>
+          <li>本地删：<code>git branch -d feature/xxx</code>；远端删：<code>git push origin --delete feature/xxx</code>。</li>
+          <li><b>不用担心丢失</b>：改动都在 main 的 commit 历史里，<code>git log</code> 可全程追溯。</li>
+        </ul>`
+    },
+    {
+      anchor: '当作功能分支开发',
+      title: '⑤ 批注：这条是什么意思',
+      html: `
+        把每个<b>分析脚本 / 自动化任务</b>都当成"开发一个功能"来走完整流程：
+        <ul>
+          <li>一条新的财务分析脚本、一个周报自动化 → 各自开 feature 分支开发 → review → 合并。</li>
+          <li>每步 <code>commit</code> 写清 message（谁、何时、为什么、改了什么），于是自然形成一条<b>可审计的变更链</b>。</li>
+          <li>出问题可用 <code>git log</code> / <code>git revert</code> 定位并回滚——这正是金融"留痕、可追溯、可追责"文化的技术落地。</li>
+        </ul>`
     }
   ];
   /* ============================================================ */
