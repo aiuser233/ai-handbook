@@ -104,6 +104,22 @@
       box-shadow:0 8px 24px rgba(0,0,0,.18); }
     .anno-pop .ttl { font-weight:700; color:var(--accent); display:block; margin-bottom:.3rem; }
     .anno-pop ul { margin:.35rem 0 0; padding-left:1.2rem; }
+    /* ===== 邀请码门 ===== */
+    .invite-gate { position:fixed; inset:0; z-index:200; display:flex; align-items:center; justify-content:center;
+      background:var(--bg); padding:1rem; }
+    .invite-card { background:var(--card); border:1px solid var(--border); border-radius:14px;
+      padding:1.5rem 1.6rem; width:min(360px,92vw); box-shadow:0 12px 40px rgba(0,0,0,.15); }
+    .invite-brand { font-weight:700; font-size:1.05rem; margin-bottom:.4rem; }
+    .invite-hint { color:var(--muted); font-size:.9rem; line-height:1.6; margin-bottom:1rem; }
+    #inviteForm { display:flex; gap:.5rem; }
+    #inviteInput { flex:1; min-width:0; padding:.5rem .7rem; border:1px solid var(--border); border-radius:8px;
+      background:var(--bg); color:var(--fg); font-size:.95rem; }
+    #inviteInput:focus { outline:none; border-color:var(--accent); }
+    #inviteBtn { padding:.5rem 1rem; border:1px solid var(--accent); background:var(--accent); color:#fff;
+      border-radius:8px; cursor:pointer; font-size:.9rem; white-space:nowrap; }
+    #inviteBtn:disabled { opacity:.5; cursor:wait; }
+    .invite-err { color:#c0392b; font-size:.85rem; margin-top:.6rem; }
+    .invite-note { color:var(--muted); font-size:.78rem; margin-top:1rem; }
     @media (max-width:1000px) {
       .layout { grid-template-columns:1fr; }
       .sidebar { display:none; }
@@ -137,6 +153,21 @@
     </div>
   </div>
   <div class="anno-pop" id="annoPop"></div>
+
+  <!-- 邀请码门：默认隐藏，JS 校验通过前覆盖全屏 -->
+  <div class="invite-gate" id="gate" style="display:none" role="dialog" aria-modal="true">
+    <div class="invite-card">
+      <div class="invite-brand">📗 AI Handbook · 邀请访问</div>
+      <p class="invite-hint">这是一份私人学习笔记站点，请输入邀请码进入。</p>
+      <form id="inviteForm">
+        <input id="inviteInput" type="text" autocomplete="off" autocapitalize="off"
+               spellcheck="false" placeholder="邀请码">
+        <button id="inviteBtn" type="submit">进入</button>
+      </form>
+      <div class="invite-err" id="inviteErr"></div>
+      <p class="invite-note">同一浏览器 24 小时内无需重复输入；邀请码区分大小写。</p>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
@@ -231,6 +262,7 @@
     $('#themeBtn').onclick = () => { applyTheme(theme === 'dark' ? 'light' : 'dark');
       localStorage.setItem('theme', theme); };
 
+    async function loadContent() {
     try {
       const res = await fetch('index.md', { cache: 'no-store' });
       if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -494,6 +526,64 @@
       err.style.display = 'block';
       err.innerHTML = '<p>加载 index.md 失败：' + e +
         '</p><p>请确认 index.md 与 index.html 在同一目录（仓库根目录）。</p>';
+    }
+    }
+
+    /* ===== 邀请码门（Web Crypto 校验 + 24h 记忆） =====
+       设计要点：
+       - 不存明文，只存 SHA-256(密码+盐) 的 hash，避免源码直接暴露密码。
+       - 校验发生在每次页面加载：localStorage 里的 hash 与当前 INVITE_HASH 一致且未过期才放行。
+       - 改密码 = 改下面 INVITE_HASH 并 push；所有已登录浏览器下次打开自动失效、需重输。
+       - 24h 过期：存 ts，超过 86400000ms 视为过期。 */
+    const INVITE_HASH = 'b97b94c8f7b033e6696a0ab00388f80b65891e16a4a4cf59d1c7ba4e72dff404';
+    const INVITE_SALT = 'ai-handbook-2026';
+    const INVITE_TTL = 86400000;         /* 24 小时 */
+    const INVITE_KEY = 'invite-auth';
+    const gate = $('#gate'), input = $('#inviteInput'), btn = $('#inviteBtn'),
+          errEl = $('#inviteErr'), form = $('#inviteForm');
+
+    async function sha256hex(s) {
+      /* Web Crypto；部署在 HTTPS、本地 localhost 均为 secure context，可用 */
+      const buf = await crypto.subtle.digest(
+        'SHA-256', new TextEncoder().encode(s + INVITE_SALT));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+    const stored = () => {
+      try { return JSON.parse(localStorage.getItem(INVITE_KEY) || 'null'); }
+      catch (e) { return null; }
+    };
+    const isAuthed = () => {
+      const s = stored();
+      return s && s.hash === INVITE_HASH && (Date.now() - s.ts) < INVITE_TTL;
+    };
+
+    const setBusy = b => { btn.disabled = b; btn.textContent = b ? '校验中…' : '进入'; };
+
+    const reveal = () => { gate.style.display = 'none'; loadContent(); };
+    const showError = msg => { errEl.textContent = msg; input.focus(); };
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      const val = input.value;
+      if (!val) { showError('请输入邀请码'); return; }
+      setBusy(true);
+      const h = await sha256hex(val);
+      setBusy(false);
+      if (h === INVITE_HASH) {
+        localStorage.setItem(INVITE_KEY, JSON.stringify({ hash: h, ts: Date.now() }));
+        gate.style.display = 'none';
+        loadContent();
+      } else {
+        showError('邀请码不正确，请重试。');
+        input.select();
+      }
+    });
+
+    /* 每次加载先判断是否已持有有效登录 */
+    if (isAuthed()) reveal();
+    else {
+      gate.style.display = 'flex';
+      setTimeout(() => input.focus(), 0);
     }
   })();
   </script>
