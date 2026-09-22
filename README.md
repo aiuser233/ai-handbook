@@ -1,6 +1,6 @@
 # AI Handbook · 公开站点
 
-> 一名金融从业者深度使用 AI 的个人学习笔记（已做免责声明，见 `index.md` 开头）。
+> 我日常使用 AI 的个人学习笔记（已附免责声明，见 `index.md` 开头）。
 
 本仓库同时是 **GitHub 文档库** 和 **Cloudflare Pages 静态站点** 的源。
 
