@@ -61,8 +61,13 @@
       border-left:2px solid transparent; border-radius:0 6px 6px 0; }
     .toc a:hover { color:var(--accent); }
     .toc a.active { color:var(--accent); border-left-color:var(--accent); background:var(--accent-soft); font-weight:600; }
-    .toc .lv1 { font-weight:600; margin-top:5px; }
-    .toc .lv2 { padding-left:20px; font-size:11.5px; }
+    .toc-sec { margin-top:3px; }
+    .toc .lv1 { font-weight:600; cursor:pointer; }
+    .toc .lv1::after { content:"▸"; float:right; font-size:10px; color:var(--muted); margin-left:auto; }
+    .toc-sec.open .lv1::after { content:"▾"; }
+    .toc-sub { display:none; margin-top:2px; }
+    .toc-sec.open > .toc-sub { display:block; }
+    .toc .lv2 { display:block; padding-left:20px; font-size:11.5px; }
     .toc-cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:.7rem; margin:1rem 0; }
     .toc-card { display:block; text-decoration:none; color:var(--fg); background:var(--card);
       border:1px solid var(--border); border-radius:10px; padding:.7rem .9rem; transition:.15s; }
@@ -241,40 +246,100 @@
       });
       doc.querySelectorAll('h3').forEach((h, i) => { h.id = 's' + i; });
 
-      /* 侧边目录（两级） */
+      /* 侧边目录（两级：章节可折叠，小节嵌套） */
       const toc = $('#toc');
-      doc.querySelectorAll('h2, h3').forEach(h => {
+      const hEls = Array.from(doc.querySelectorAll('h2[id], h3[id]'));
+      const aMap = {};                       // a element by target id
+      let curSec = null;
+      hEls.forEach(h => {
         const a = document.createElement('a');
         a.href = '#' + h.id;
         a.textContent = h.textContent;
-        a.className = h.tagName === 'H2' ? 'lv1' : 'lv2';
-        toc.appendChild(a);
+        aMap[h.id] = a;
+        if (h.tagName === 'H2') {
+          const sec = document.createElement('div');
+          sec.className = 'toc-sec';
+          a.className = 'lv1';
+          sec.appendChild(a);
+          const sub = document.createElement('div');
+          sub.className = 'toc-sub';
+          sec.appendChild(sub);
+          toc.appendChild(sec);
+          curSec = sub;
+        } else {
+          a.className = 'lv2';
+          (curSec || toc).appendChild(a);
+        }
       });
+      const secs = Array.from(toc.querySelectorAll('.toc-sec'));
+      if (secs[0]) secs[0].classList.add('open');   /* 默认展开第一章 */
 
-      /* 滚动高亮：随正文滚动，左侧目录自动跟随（比 IntersectionObserver 更稳，
-         快滚不会乱跳；并把当前项保持在侧栏可见，但不干扰正文滚动） */
-      const links = Array.from(toc.children);
-      const byId = {};
-      links.forEach(a => byId[a.getAttribute('href').slice(1)] = a);
-      const heads = Array.from(doc.querySelectorAll('h2[id], h3[id]'));
+      /* 点击定位：章节/小节均平滑滚动，并自动展开对应章节的小节；锁定期间滚动跟随不抢高亮 */
+      let followLockUntil = 0;   /* 平滑定位期间，暂时禁用滚动自动高亮，避免中途乱跳 */
+      const lockFollow = ms => { followLockUntil = performance.now() + ms; };
+      /* 滚动高亮：随正文滚动，左侧目录自动跟随，并自动展开当前章节 */
       const sb = document.querySelector('.sidebar');
+      const heads = hEls;
       const setActive = id => {
-        links.forEach(a => a.classList.remove('active'));
-        const el = byId[id];
+        toc.querySelectorAll('a.active').forEach(a => a.classList.remove('active'));
+        const el = aMap[id];
         if (!el) return;
         el.classList.add('active');
+        const sec = el.closest('.toc-sec');
+        if (sec && !sec.classList.contains('open')) sec.classList.add('open');
         if (sb) {
           const top = el.offsetTop, bottom = top + el.offsetHeight;
           if (top < sb.scrollTop + 32 || bottom > sb.scrollTop + sb.clientHeight - 32)
             sb.scrollTop = top - sb.clientHeight / 2 + el.offsetHeight / 2;
         }
       };
+      const gotoHeading = (id, secEl) => {
+        if (secEl && !secEl.classList.contains('open')) secEl.classList.add('open');
+        const t = document.getElementById(id);
+        if (!t) return;
+        lockFollow(900);
+        t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        setActive(id);           /* 高亮立即生效，不等滚动跟随 */
+        history.replaceState(null, '', '#' + id);
+      };
+      toc.querySelectorAll('.lv1').forEach(a => {
+        a.addEventListener('click', e => {
+          e.preventDefault();
+          gotoHeading(a.href.slice(1), a.closest('.toc-sec'));
+        });
+      });
+      toc.querySelectorAll('.lv2').forEach(a => {
+        a.addEventListener('click', e => {
+          e.preventDefault();
+          gotoHeading(a.href.slice(1), a.closest('.toc-sec'));
+        });
+      });
+      /* 顶栏导航：同样平滑定位 + 高亮 + 展开对应章节 */
+      document.querySelectorAll('.chips a').forEach(a => {
+        a.addEventListener('click', e => {
+          const m = a.getAttribute('href') && a.getAttribute('href').match(/^#([a-z0-9]+)$/i);
+          if (!m || !document.getElementById(m[1])) return;   /* 未知锚点走默认行为 */
+          e.preventDefault();
+          gotoHeading(m[1], aMap[m[1]] ? aMap[m[1]].closest('.toc-sec') : null);
+        });
+      });
+      /* 第0章章节卡片是后生成的，用事件委托 */
+      document.addEventListener('click', e => {
+        const card = e.target.closest('.toc-card');
+        if (!card) return;
+        const m = card.getAttribute('href') && card.getAttribute('href').match(/^#([a-z0-9]+)$/i);
+        if (!m || !document.getElementById(m[1])) return;
+        e.preventDefault();
+        gotoHeading(m[1], aMap[m[1]] ? aMap[m[1]].closest('.toc-sec') : null);
+      }, true);
+
       let ticking = false;
       const onScrollTOC = () => {
         if (ticking) return;
         ticking = true;
         requestAnimationFrame(() => {
           ticking = false;
+          if (performance.now() < followLockUntil) return;   /* 平滑定位进行中，不跟随 */
           if (!heads.length) return;
           const line = 110;                 /* 视口顶部偏移阈值 */
           let cur = heads[0].id;
