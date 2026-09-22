@@ -184,19 +184,23 @@
 
 ### 2.0 平台形态速览（先建立地图）
 
+> 说明：这张表是**"形态"地图**，帮你理解不同入口的差别。但注意 2026 年的现实：**主流编码 Agent 几乎都是"多形态组合"**——Codex、Claude Code、ZCode、OpenCode 都同时覆盖 CLI + 桌面 + 云端（Codex 还到移动端）。下表的"代表"指该形态下常见的选择，不代表平台只有那一种形态。
+
 | 形态 | 代表 | 一句话 |
 |---|---|---|
-| 终端 CLI Agent | Codex CLI、Claude Code、OpenCode、Gemini CLI | 在终端里下任务，它读代码、改文件、跑命令 |
-| 桌面 ADE（Agentic 开发环境） | ZCode | 可视化"桌面工作台"，内置 Agent/终端/预览/Git，门槛最低 |
-| AI 原生 IDE | Cursor、Zed、Windsurf | 编辑器里直接干活，Tab 补全 + 多文件编辑 + 智能体面板 |
-| 云/委托执行 | Codex Web（chatgpt.com/codex） | 任务丢上云后台跑，手机看进度 |
+| 终端 CLI Agent | Codex CLI、Claude Code（CLI）、OpenCode、Gemini CLI、ZCode CLI | 在终端里下任务，它读代码、改文件、跑命令；可脚本化、适合自动化 |
+| 桌面 App / ADE（智能体开发环境） | ZCode、Claude Code 桌面版（2026-04 改版：并行会话 + 内置终端/Diff 审阅）、Codex 桌面端（2026-07 起并入 ChatGPT 桌面版作为"模式"） | 可视化"工作台"：管理多个 Agent 会话、看文件/Diff/终端/预览，门槛最低 |
+| AI 原生 IDE | Cursor、Zed、Windsurf | 编辑器里直接干活：Tab 补全 + 多文件编辑 + 智能体面板，最贴近手工编码 |
+| 云 / 委托执行 | Codex 云（chatgpt.com/codex）、Claude Code Web + 手机 Dispatch | 任务丢上云后台跑（笔记本可合盖），Web/手机看进度、审 Diff |
 | 通用桌面助手 | 你现在用的这类 | 本地文件 + 工具 + skill，办公场景（写报告、管仓库、部署）一站式 |
 
-### 2.1 OpenAI Codex（CLI + 云端）
+> 选型的正确姿势：先想**任务形态**（长任务委托？编辑器里顺手写？终端自动化？），再选**平台的对应入口**，而不是"选一个平台"。
 
-- **定位**：OpenAI 官方编码 Agent，开源（Apache-2.0，Rust 编写），终端里规划/改代码/跑命令；长任务可"委托"给云端 Codex 后台跑完再拉回。
+### 2.1 OpenAI Codex（CLI + 桌面 App + 云端 + 移动端）
+
+- **定位**：OpenAI 官方编码 Agent，**多形态组合**：开源 CLI（Apache-2.0，Rust 编写）+ 桌面 App（macOS 2026-02、Windows 2026-03，2026-07 起并入 ChatGPT 桌面版作为"模式"）+ IDE 插件 + 云端 + 移动端；长任务可"委托"给云端后台跑完再拉回。
 - **亮点**：
-  - 终端 + IDE（VS Code/Cursor 插件）+ 桌面 App + 云端多形态。
+  - 五个入口：CLI、桌面 App、IDE 插件、云端（chatgpt.com/codex）、移动端，同一 Agent 随处驱动。
   - 支持 **skills 与 sub-agents**（并行子任务）；完整 MCP 支持。
   - 与 ChatGPT 生态打通：Plus/Pro 订阅额度内使用，入门成本极低。
   - 云端"异步执行"：提一个任务，该干别的干别的，回来验收。
@@ -204,7 +208,7 @@
 
 ### 2.2 Claude Code（Anthropic）
 
-- **定位**：终端编码 Agent 的标杆，"能较完整地理解整个代码库再动手"的长自主会话能力最强。
+- **定位**：编码 Agent 的标杆，"能较完整地理解整个代码库再动手"的长自主会话能力最强；**多形态**：CLI（原身，可脚本化）+ 桌面 App（2026-04 大改版：并行会话、内置终端/文件编辑器、可视化 Diff 审阅）+ IDE 插件 + Web/手机（Dispatch 远程派任务）。
 - **亮点**：
   - 递归探索项目结构、读相关配置、建立上下文后再改——大型代码库重构/复杂项目尤强。
   - 生态最大：**3000+ MCP 集成**、hooks、后台 sub-agents；skill 体系（第 4、10 章）的起点就是它。
@@ -213,12 +217,12 @@
 
 ### 2.3 ZCode（智谱 Z.ai）—— 国产 Harness 的代表
 
-- **定位**：智谱 Z.ai 的 **ADE（Agentic Development Environment）**，桌面应用，**针对 GLM 系列专门优化的国产 Coding Harness**，官方口径用户已破百万（2026-08）。
+- **定位**：智谱 Z.ai 的 **ADE（Agentic Development Environment）**，主打桌面 App（macOS/Windows，可视化工作台），同时提供**官方 CLI**（`npm i -g @zhipu/zcode`）与 Web 形态；**针对 GLM 系列专门优化的国产 Coding Harness**，官方口径用户已破百万（2026-08）。
 - **核心逻辑**（值得记住）：*模型决定能力上限，Harness 负责上下文管理、工具调用、任务调度、缓存与结果校验*——同一模型在不同 Harness 里表现差异很大，ZCode 宣称 GLM 搭配 ZCode 的任务通过率显著高于搭配其他 Agent。
 - **亮点**：
   - 专门适配 GLM-5.2 / GLM-5.3（**1M 上下文**），长程任务不丢连续性（目标、文件、终端结果、Git 状态在同一任务里保持）。
   - 四大机制（2026-08 升级）：**Goal（目标模式，自主跑完复杂任务）、Subagents（子智能体并行）、Remote Control（远程/手机跟进）、闲时任务**。
-  - 桌面可视化：文件树 + Agent 对话 + 终端面板 + 内置浏览器预览 + 原生 Git，**命令行门槛最低**。
+  - 桌面可视化：文件树 + Agent 对话 + 终端面板 + 内置浏览器预览 + 原生 Git，**命令行门槛最低**；还能在统一界面里**调度 Claude Code / Codex / Gemini CLI 等第三方 CLI** 协同干活。
   - 配套 **GLM Coding Plan** 订阅（额度制，国内网络直连、性价比高）；支持 MCP、skills。
 - **提示**：
   - 国内合规环境友好（无需翻墙、人民币计费、数据走国内通道）——相比 Codex/Claude Code，**数据出境顾虑最小**。
