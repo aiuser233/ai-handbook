@@ -251,18 +251,45 @@
         toc.appendChild(a);
       });
 
-      /* 滚动高亮 */
+      /* 滚动高亮：随正文滚动，左侧目录自动跟随（比 IntersectionObserver 更稳，
+         快滚不会乱跳；并把当前项保持在侧栏可见，但不干扰正文滚动） */
       const links = Array.from(toc.children);
       const byId = {};
       links.forEach(a => byId[a.getAttribute('href').slice(1)] = a);
+      const heads = Array.from(doc.querySelectorAll('h2[id], h3[id]'));
+      const sb = document.querySelector('.sidebar');
       const setActive = id => {
         links.forEach(a => a.classList.remove('active'));
-        if (byId[id]) byId[id].classList.add('active');
+        const el = byId[id];
+        if (!el) return;
+        el.classList.add('active');
+        if (sb) {
+          const top = el.offsetTop, bottom = top + el.offsetHeight;
+          if (top < sb.scrollTop + 32 || bottom > sb.scrollTop + sb.clientHeight - 32)
+            sb.scrollTop = top - sb.clientHeight / 2 + el.offsetHeight / 2;
+        }
       };
-      const obs = new IntersectionObserver(entries => {
-        entries.forEach(en => { if (en.isIntersecting) setActive(en.target.id); });
-      }, { rootMargin: '-90px 0px -70% 0px' });
-      doc.querySelectorAll('h2[id], h3[id]').forEach(h => obs.observe(h));
+      let ticking = false;
+      const onScrollTOC = () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+          ticking = false;
+          if (!heads.length) return;
+          const line = 110;                 /* 视口顶部偏移阈值 */
+          let cur = heads[0].id;
+          for (const h of heads) {
+            if (h.getBoundingClientRect().top - line <= 0) cur = h.id;
+            else break;
+          }
+          /* 滚到最底部时，强制选中最后一节 */
+          if (window.innerHeight + window.scrollY >= document.body.scrollHeight - 4)
+            cur = heads[heads.length - 1].id;
+          setActive(cur);
+        });
+      };
+      addEventListener('scroll', onScrollTOC, { passive: true });
+      onScrollTOC();
 
       /* 第 0 章的目录表 -> 章节卡片 */
       const ch0 = $('#ch0');
