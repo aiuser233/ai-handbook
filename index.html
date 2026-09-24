@@ -9,13 +9,13 @@
       --bg:#ffffff; --fg:#1a1a1a; --muted:#66707a; --border:#e3e6ea; --card:#f6f8fa;
       --accent:#1d4ed8; --accent-soft:#eef4ff; --code-bg:#0d1117; --code-fg:#e6edf3;
       --topbar-bg:rgba(255,255,255,.92);
-      --p0:#64748b; --p1:#1d4ed8; --p2:#0f766e; --p3:#7c3aed; --p4:#b45309;
+      --p0:#64748b; --p1:#1d4ed8; --p2:#0f766e; --p3:#7c3aed; --p4:#b45309; --p5:#0ea5e9;
     }
     [data-theme="dark"] {
       --bg:#0f1115; --fg:#d7dbe0; --muted:#8b94a0; --border:#262c35; --card:#171b22;
       --accent:#7aa2ff; --accent-soft:#1a2436; --code-bg:#0a0c10; --code-fg:#d6deeb;
       --topbar-bg:rgba(15,17,21,.9);
-      --p0:#8494ab; --p1:#7aa2ff; --p2:#4fd1c5; --p3:#a78bfa; --p4:#f59e0b;
+      --p0:#8494ab; --p1:#7aa2ff; --p2:#4fd1c5; --p3:#a78bfa; --p4:#f59e0b; --p5:#38bdf8;
     }
     * { box-sizing:border-box; }
     html { scroll-behavior:smooth; }
@@ -67,7 +67,7 @@
     /* ===== Part 主题色 ===== */
     [data-part="p0"] { --pc:var(--p0); } [data-part="p1"] { --pc:var(--p1); }
     [data-part="p2"] { --pc:var(--p2); } [data-part="p3"] { --pc:var(--p3); }
-    [data-part="p4"] { --pc:var(--p4); }
+    [data-part="p4"] { --pc:var(--p4); } [data-part="p5"] { --pc:var(--p5); }
     h3[data-part] { border-left-color:var(--pc); }
     h3[data-part] .h3-en { color:var(--pc); }
     .toc-sec[data-part] > a.lv1 { color:var(--pc); }
@@ -233,7 +233,7 @@
         <a href="#ch1" class="pd">核心概念</a><a href="#ch2">平台</a>
         <a href="#ch3" class="pd">安全合规</a><a href="#ch4">Skill</a><a href="#ch5">Skill实例</a>
         <a href="#ch6" class="pd">Git</a><a href="#ch7" class="pd">Cloudflare</a>
-        <a href="#ch8" class="pd">FAQ</a><a href="#ch9">术语表</a><a href="#ch10">成本</a><a href="#appA">模板库</a>
+        <a href="#ch8" class="pd">成本</a><a href="#ch9" class="pd">FAQ</a><a href="#ch10">术语表</a><a href="#appA">模板库</a>
       </nav>
       <button id="themeBtn" title="切换明暗模式">🌙</button>
     </div>
@@ -366,12 +366,13 @@
     { cls:'p1', text:'①', name:'原理与选型', sub:'第 1–2 章',   ids:['ch1','ch2'] },
     { cls:'p2', text:'②', name:'红线与技能', sub:'第 3–5 章',   ids:['ch3','ch4','ch5'] },
     { cls:'p3', text:'③', name:'工程化支撑', sub:'第 6–7 章',   ids:['ch6','ch7'] },
-    { cls:'p4', text:'参考与速查', name:'', sub:'第 8–10 章 + 附录', ids:['ch8','ch9','ch10','appA','appB'] }
+    { cls:'p5', text:'④', name:'成本与配额', sub:'第 8 章',   ids:['ch8'] },
+    { cls:'p4', text:'⑤', name:'速查与参考', sub:'第 9–10 章 + 附录', ids:['ch9','ch10','appA','appB'] }
   ];
   const EN = {
     ch0:'OVERVIEW & QUICK START', ch1:'CORE CONCEPTS', ch2:'PLATFORMS', ch3:'SAFETY & COMPLIANCE',
     ch4:'SKILLS', ch5:'SKILL IN PRACTICE', ch6:'GIT & GITHUB', ch7:'CLOUDFLARE',
-    ch8:'FAQ', ch9:'GLOSSARY', ch10:'COST & QUOTA', appA:'PROMPT TEMPLATES', appB:'TOOLS & ROADMAP'
+    ch8:'COST & QUOTA', ch9:'FAQ', ch10:'GLOSSARY', appA:'PROMPT TEMPLATES', appB:'TOOLS & ROADMAP'
   };
 
   (async () => {
