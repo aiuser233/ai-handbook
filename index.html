@@ -98,11 +98,6 @@
     .sidebar { position:sticky; top:64px; max-height:calc(100vh - 80px); overflow:auto;
       font-size:12.5px; border-right:1px solid var(--border); padding-right:1rem; }
     .side-title { font-weight:700; margin:.4rem 0 .6rem; color:var(--muted); letter-spacing:.05em; }
-    /* 当前所在指示器 */
-    .cur-pill { font-size:.75rem; background:var(--accent-soft); color:var(--accent);
-      padding:.45rem .6rem; border-radius:8px; margin-bottom:.6rem; line-height:1.5; }
-    .cur-pill b { display:block; font-size:.85rem; }
-    .cur-pill span { color:var(--muted); font-weight:400; }
     .toc a { display:block; color:var(--muted); text-decoration:none; padding:2px 8px;
       border-left:2px solid transparent; border-radius:0 6px 6px 0; }
     .toc a:hover { color:var(--accent); }
@@ -199,16 +194,14 @@
     .chips::-webkit-scrollbar { display:none; }
     .chips a { padding:6px 10px; border-radius:8px; color:var(--muted); }
     .chips a:hover,.chips a.pd { color:var(--accent); background:var(--accent-soft); }
-    .layout { max-width:1380px; padding:30px 24px 80px; grid-template-columns:252px minmax(0,820px); gap:42px; }
-    .sidebar { top:88px; max-height:calc(100vh - 112px); padding-right:18px; }
+    .layout { max-width:1520px; padding:30px 0 80px; grid-template-columns:232px minmax(0,960px); gap:26px; }
+    .sidebar { top:88px; max-height:calc(100vh - 112px); padding:0 18px 0 0; }
     .side-title { font-size:18px; letter-spacing:-.02em; }
-    .side-title::before { content:"Reading map"; display:block; margin-bottom:9px; color:var(--muted); font-size:10px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
-    .cur-pill { padding:11px 12px; border-radius:12px; font-size:11px; }
     .toc-part { margin:20px 0 6px; font-size:10px; letter-spacing:.1em; text-transform:uppercase; }
     .toc a { padding:5px 9px; border-radius:0 8px 8px 0; font-size:12px; line-height:1.45; }
     .toc .lv1 { color:var(--fg); font-weight:650; }
     .toc a:hover { background:var(--surface-2); }
-    .doc { background:var(--surface); border:1px solid var(--border); border-radius:18px; box-shadow:var(--shadow); padding:42px 58px 76px; }
+    .doc { background:var(--surface); border:1px solid var(--border); border-radius:18px; box-shadow:var(--shadow); padding:42px 30px 76px; }
     .doc #doc > h1 { margin-top:0; padding-bottom:24px; border-bottom:1px solid var(--border); font-size:clamp(2rem,4vw,3.1rem); line-height:1.15; letter-spacing:-.05em; }
     .doc #doc > h1 + p { color:var(--muted); font-size:17px; }
     h2 { margin:70px 0 19px; padding:16px 18px 13px; border:1px solid color-mix(in srgb,var(--pc) 22%,var(--border)); border-left:5px solid var(--pc); border-radius:12px; background:linear-gradient(100deg,color-mix(in srgb,var(--pc) 8%,transparent),transparent 70%); }
@@ -225,7 +218,7 @@
     .toc-cards { grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
     .toc-card { padding:15px 16px; border-radius:11px; background:var(--surface-2); }
     .toc-card:hover { transform:translateY(-2px); box-shadow:0 8px 18px rgba(30,45,65,.08); }
-    @media (max-width:1050px) { .topbar .row { padding-inline:16px; } .chips { display:none; } .layout { grid-template-columns:1fr; padding:20px 16px 50px; } .sidebar { top:0; width:min(310px,88vw); max-height:none; padding:25px 20px; background:var(--surface); transform:translateX(-105%); } .doc { padding:30px 25px 55px; } }
+    @media (max-width:1050px) { .chips { display:none; } .layout { grid-template-columns:1fr; padding:20px 16px 50px; } .sidebar { top:0; width:min(310px,88vw); max-height:none; padding:25px 20px; background:var(--surface); transform:translateX(-105%); } .doc { padding:30px 25px 55px; } }
     @media (max-width:620px) { .doc { border-radius:14px; padding:25px 18px 45px; } .doc #doc > h1 { font-size:2rem; } h2 { margin-top:50px; padding:13px; } .toc-cards { grid-template-columns:1fr; } }
   </style>
 </head>
@@ -249,7 +242,6 @@
   <div class="layout">
     <aside class="sidebar" id="side">
       <div class="side-title">目录导航</div>
-      <div id="curPill" class="cur-pill" style="display:none"></div>
       <nav id="toc" class="toc"></nav>
       <a class="backtop" href="#top">↑ 回到顶部</a>
     </aside>
@@ -490,41 +482,26 @@
       let followLockUntil = 0;
       const lockFollow = ms => { followLockUntil = performance.now() + ms; };
       const sb = document.querySelector('.sidebar');
-      const curPill = $('#curPill');
-      const setActive = id => {
+      const setActive = (id, keepState) => {
         toc.querySelectorAll('a.active').forEach(a => a.classList.remove('active'));
         const el = aMap[id];
         if (!el) return;
         el.classList.add('active');
         const sec = el.closest('.toc-sec');
-        if (sec && !sec.classList.contains('open')) sec.classList.add('open');
+        if (keepState && sec && !sec.classList.contains('open')) sec.classList.add('open');
         if (sb) {
           const top = el.offsetTop, bottom = top + el.offsetHeight;
           if (top < sb.scrollTop + 32 || bottom > sb.scrollTop + sb.clientHeight - 32)
             sb.scrollTop = top - sb.clientHeight / 2 + el.offsetHeight / 2;
         }
-        /* 当前所在指示器 */
-        let chText = '', secText = '';
-        const aid = a => (a.getAttribute('href') || '').slice(1);
-        if (el.classList.contains('lv1')) chText = origText[aid(el)];
-        else {
-          const p = el.closest('.toc-sec');
-          if (p) chText = origText[aid(p.querySelector('a.lv1'))];
-          secText = origText[aid(el)];
-        }
-        const pc = (sec && sec.getAttribute('data-part')) || 'p0';
-        curPill.style.setProperty('--pc', 'var(--' + pc + ')');
-        curPill.innerHTML = '<span>当前所在</span><b style="color:var(--' + pc + ')">' +
-          (secText ? chText + ' · ' + secText : chText) + '</b>';
-        curPill.style.display = 'block';
       };
-      const gotoHeading = (id, secEl) => {
-        if (secEl && !secEl.classList.contains('open')) secEl.classList.add('open');
+      const gotoHeading = (id, secEl, keepState) => {
+        if (keepState && secEl && !secEl.classList.contains('open')) secEl.classList.add('open');
         const t = document.getElementById(id);
         if (!t) return;
         lockFollow(900);
         t.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        setActive(id);
+        setActive(id, keepState);
         history.replaceState(null, '', '#' + id);
         closeDrawer();
       };
@@ -535,9 +512,9 @@
           const sec = a.closest('.toc-sec');
           if (a.classList.contains('lv1') && sec) {
             sec.classList.toggle('open');      /* 点击章节主标题：展开/折叠 + 跳转 */
-            gotoHeading(id, null);
+            gotoHeading(id, null, false);      /* keepState=false：折叠后保持折叠 */
           } else {
-            gotoHeading(id, sec);             /* 点击小节：确保父级展开并跳转 */
+            gotoHeading(id, sec, true);       /* 点击小节：确保父级展开并跳转 */
           }
         });
       });
@@ -547,7 +524,7 @@
           const m = a.getAttribute('href') && a.getAttribute('href').match(/^#([a-z0-9]+)$/i);
           if (!m || !document.getElementById(m[1])) return;
           e.preventDefault();
-          gotoHeading(m[1], aMap[m[1]] ? aMap[m[1]].closest('.toc-sec') : null);
+          gotoHeading(m[1], aMap[m[1]] ? aMap[m[1]].closest('.toc-sec') : null, true);
         });
       });
       /* 章节卡片是后生成的，用事件委托 */
@@ -557,7 +534,7 @@
         const m = card.getAttribute('href') && card.getAttribute('href').match(/^#([a-z0-9]+)$/i);
         if (!m || !document.getElementById(m[1])) return;
         e.preventDefault();
-        gotoHeading(m[1], aMap[m[1]] ? aMap[m[1]].closest('.toc-sec') : null);
+        gotoHeading(m[1], aMap[m[1]] ? aMap[m[1]].closest('.toc-sec') : null, true);
       }, true);
 
       let ticking = false;
@@ -576,7 +553,7 @@
           }
           if (window.innerHeight + window.scrollY >= document.body.scrollHeight - 4)
             cur = heads[heads.length - 1].id;
-          setActive(cur);
+          setActive(cur, true);   /* scrollspy: auto-expand current section */
         });
       };
       addEventListener('scroll', onScrollTOC, { passive: true });
