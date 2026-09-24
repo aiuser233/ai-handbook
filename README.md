@@ -50,7 +50,7 @@ GitHub 仓库 (aiuser233/ai-handbook, main 分支)
 
 ```
 第 0 章 目录与快速上手
-第 1 章 核心概念（LLM / Prompt / Agent / Harness / 工具调用 / RAG / MCP / 微调 / 记忆 / 1.10 验证与评测 / 项目脚手架）
+第 1 章 核心概念（LLM / Prompt / Agent / Harness / 工具调用 / RAG / MCP / 微调 / 记忆 / 1.10 验证与评测 / 1.11 本地与私有化部署 / 项目脚手架）
 第 2 章 推荐的 AI 使用平台（2.0 形态速览表 + 2.1–2.7 各平台）
 第 3 章 安全、合规与伦理（3.1 数据分级 / 3.2 脱敏清单 / 3.4 提示词注入 / 3.9 合规 Checklist）
 第 4 章 Skill 概念
