@@ -50,24 +50,25 @@ GitHub 仓库 (aiuser233/ai-handbook, main 分支)
 
 ```
 第 0 章 目录与快速上手
-第 1 章 核心概念（LLM / Prompt / Agent / Harness / 工具调用 / RAG / MCP / 结构化输出）
+第 1 章 核心概念（LLM / Prompt / Agent / Harness / 工具调用 / RAG / MCP / 微调 / 记忆 / 1.10 验证与评测 / 项目脚手架）
 第 2 章 推荐的 AI 使用平台（2.0 形态速览表 + 2.1–2.7 各平台）
-第 3 章 安全、合规与伦理（金融红线，动手实操前先读）
+第 3 章 安全、合规与伦理（3.1 数据分级 / 3.2 脱敏清单 / 3.4 提示词注入 / 3.9 合规 Checklist）
 第 4 章 Skill 概念
 第 5 章 Skill 实例（含 5.6 安装三招 / 5.6.1 详解 / 5.7 安全红线）
-第 6 章 Git 与 GitHub
+第 6 章 Git 与 GitHub（6.4 含 AI 写代码最小闭环）
 第 7 章 Cloudflare
-第 8 章 FAQ
-第 9 章 中英术语表
-附录 A 提示词模板库（当前只有 A1 苏格拉底式提问）
-附录 B 工具清单与学习路线
+第 8 章 FAQ（15 条）
+第 9 章 中英术语表（33 条）
+第 10 章 成本与配额管理（订阅 vs API / 上下文缓存 / 模型分级 / 成本粗估）
+附录 A 提示词模板库（A1 苏格拉底式提问 + A2 项目执行框架）
+附录 B 工具清单与学习路线（7 步）
 ```
 
 **新增/删除章节后必须同步的地方（易漏）：**
 1. 第 0 章的"目录"表格
 2. 第 0 章的"编排逻辑"一句话
 3. `index.html` 顶栏 `.chips` 导航链接
-4. `index.html` 里 h2 锚点映射脚本：`h.id = i<=9 ? 'ch'+i : (i===10?'appA':'appB')`——**章节总数变化时要检查这段**（h2 数量超过 10 个会落到 appA/appB 的兜底逻辑，需按实际调整）
+4. `index.html` 里 h2 锚点映射脚本：`h.id = i<=9 ? 'ch'+i : (i===10?'appA':'appB')`——**章节总数变化时要检查这段**（当前 12 个 h2，超过 10 个会落到 appA/appB 兜底逻辑，需按实际调整）。**再加章节前先 `npx serve .` 本地预览确认锚点正常。**
 5. 正文里的所有交叉引用（"呼应第 X 章""见 5.7"之类）
 
 > 经验：章节大改优先用**脚本批量重排 + 全局替换交叉引用**，再逐条核对，比手改可靠。
@@ -134,10 +135,10 @@ GitHub 仓库 (aiuser233/ai-handbook, main 分支)
 | 网页改了内容但"没变" | ① Cloudflare 还没部署完（等 1–3 分钟）；② 浏览器缓存 → `Ctrl+F5` 强刷；③ 推送的分支不是 Pages 监听的那个（默认 `main`） |
 | 批注角标没出现 | 多半是 `anchor` 与 `index.md` 文字不完全一致；看浏览器控制台 `console.warn('anno anchor not found', ...)` |
 
-**代理配置（本机已设置，便于我这边自动 push/pull）：**
-- `git config --global http.proxy http://127.0.0.1:4780`（及 `https.proxy`）
+**代理配置（本机已设置，便于自动 push/pull）：**
+- `git config --global http.proxy <proxy_url>`（及 `https.proxy`）
 - `git config --global http.sslBackend openssl`（避开 Windows 自带 TLS 穿代理的握手问题）
-- 若端口变了：`git config --global http.proxy <新端口>` 重新探测（常见 ClashR 端口 4780/4781/4788）。
+- 接手后先跑 `git config --global --list | findstr proxy` 确认当前环境的代理端口，再按需更新。
 
 ---
 
@@ -152,4 +153,4 @@ GitHub 仓库 (aiuser233/ai-handbook, main 分支)
 
 ---
 
-*维护者备注：最近一次结构调整是"章节重排 + 去金融从业者/深度措辞 + 模板库精简为苏格拉底式 + 排版升级 + 侧栏左移 + 悬停批注系统"。功能演进都落在 `index.html`（交互）与 `index.md`（内容），二者职责见第 1 节。*
+*维护者备注：最近一次结构调整（2026-09）包括"章节重排 + 去金融从业者/深度措辞 + 模板库（A1 苏格拉底式 + A2 项目执行框架）+ 排版升级 + 侧栏左移 + 悬停批注系统 + 新增 1.10 验证与评测 + 第 3 章加厚（数据分级/脱敏清单/提示词注入/合规 Checklist）+ 新增第 10 章成本与配额管理 + 6.4 最小闭环 + FAQ 扩至 15 条 + 术语表扩至 33 条 + 附录 B 学习路线加 RAG demo 与成本意识"。功能演进都落在 `index.html`（交互）与 `index.md`（内容），二者职责见第 1 节。*
