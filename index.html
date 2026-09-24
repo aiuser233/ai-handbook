@@ -233,7 +233,7 @@
         <a href="#ch1" class="pd">核心概念</a><a href="#ch2">平台</a>
         <a href="#ch3" class="pd">安全合规</a><a href="#ch4">Skill</a><a href="#ch5">Skill实例</a>
         <a href="#ch6" class="pd">Git</a><a href="#ch7" class="pd">Cloudflare</a>
-        <a href="#ch8" class="pd">FAQ</a><a href="#ch9">术语表</a><a href="#appA">模板库</a>
+        <a href="#ch8" class="pd">FAQ</a><a href="#ch9">术语表</a><a href="#ch10">成本</a><a href="#appA">模板库</a>
       </nav>
       <button id="themeBtn" title="切换明暗模式">🌙</button>
     </div>
@@ -366,12 +366,12 @@
     { cls:'p1', text:'①', name:'原理与选型', sub:'第 1–2 章',   ids:['ch1','ch2'] },
     { cls:'p2', text:'②', name:'红线与技能', sub:'第 3–5 章',   ids:['ch3','ch4','ch5'] },
     { cls:'p3', text:'③', name:'工程化支撑', sub:'第 6–7 章',   ids:['ch6','ch7'] },
-    { cls:'p4', text:'参考与速查', name:'', sub:'第 8–9 章 + 附录', ids:['ch8','ch9','appA','appB'] }
+    { cls:'p4', text:'参考与速查', name:'', sub:'第 8–10 章 + 附录', ids:['ch8','ch9','ch10','appA','appB'] }
   ];
   const EN = {
     ch0:'OVERVIEW & QUICK START', ch1:'CORE CONCEPTS', ch2:'PLATFORMS', ch3:'SAFETY & COMPLIANCE',
     ch4:'SKILLS', ch5:'SKILL IN PRACTICE', ch6:'GIT & GITHUB', ch7:'CLOUDFLARE',
-    ch8:'FAQ', ch9:'GLOSSARY', appA:'PROMPT TEMPLATES', appB:'TOOLS & ROADMAP'
+    ch8:'FAQ', ch9:'GLOSSARY', ch10:'COST & QUOTA', appA:'PROMPT TEMPLATES', appB:'TOOLS & ROADMAP'
   };
 
   (async () => {
@@ -406,9 +406,9 @@
       $('#loading').remove();
       doc.style.display = 'block';
 
-      /* 锚点：h2 -> ch0..ch9, appA, appB；h3 -> s0..；h4 -> h0..（h4 仅用于定位） */
+      /* 锚点：h2 -> ch0..ch10, appA, appB；h3 -> s0..；h4 -> h0..（h4 仅用于定位） */
       doc.querySelectorAll('h2').forEach((h, i) => {
-        h.id = i <= 9 ? 'ch' + i : (i === 10 ? 'appA' : 'appB');
+        h.id = i <= 10 ? 'ch' + i : (i === 11 ? 'appA' : 'appB');
       });
       doc.querySelectorAll('h3').forEach((h, i) => { h.id = 's' + i; });
       doc.querySelectorAll('h4').forEach((h, i) => { h.id = 'h' + i; });
