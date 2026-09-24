@@ -595,6 +595,17 @@
             return { cls:'p0', name:'总览', sub:'' };
           };
           const shown = new Set();
+          /* 总览（ch0 自身无卡片） */
+          const grid0 = document.createElement('div');
+          grid0.className = 'toc-cards';
+          const a0 = document.createElement('a');
+          a0.className = 'ch-card toc-card';
+          a0.setAttribute('data-part','p0');
+          a0.href = '#ch0';
+          a0.innerHTML = '<div class="no">第 0 章</div><div class="tt">目录与快速上手</div>' +
+            '<div class="desc">编排逻辑 · 章节总览 · 从这里开始</div>';
+          grid0.appendChild(a0);
+          wrap.appendChild(grid0);
           PARTS.forEach(p => {
             const g = rows.filter(r => p.ids.includes(r.id));
             if (!g.length) return;
@@ -614,17 +625,6 @@
             });
             wrap.appendChild(grid);
           });
-          /* 总览（ch0 自身无卡片） */
-          const grid0 = document.createElement('div');
-          grid0.className = 'toc-cards';
-          const a0 = document.createElement('a');
-          a0.className = 'ch-card toc-card';
-          a0.setAttribute('data-part','p0');
-          a0.href = '#ch0';
-          a0.innerHTML = '<div class="no">第 0 章</div><div class="tt">目录与快速上手</div>' +
-            '<div class="desc">编排逻辑 · 章节总览 · 从这里开始</div>';
-          grid0.appendChild(a0);
-          wrap.appendChild(grid0);
           table.insertAdjacentElement('afterend', wrap);
         }
       }
