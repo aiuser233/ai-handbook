@@ -237,10 +237,10 @@
       <span class="brand">📗 AI Handbook</span>
       <nav class="chips">
         <a href="#ch0">目录</a>
-        <span class="chip-sep">① 原理·选型</span><a href="#ch1" class="pd">核心概念</a><a href="#ch2">平台</a>
-        <span class="chip-sep">② 红线·技能</span><a href="#ch3" class="pd">安全合规</a><a href="#ch4">Skill</a><a href="#ch5">Skill实例</a>
-        <span class="chip-sep">③ 工程化</span><a href="#ch6" class="pd">Git</a><a href="#ch7">Cloudflare</a>
-        <span class="chip-sep">参考</span><a href="#ch8" class="pd">FAQ</a><a href="#ch9">术语表</a><a href="#appA">模板库</a>
+        <a href="#ch1" class="pd">核心概念</a><a href="#ch2">平台</a>
+        <a href="#ch3" class="pd">安全合规</a><a href="#ch4">Skill</a><a href="#ch5">Skill实例</a>
+        <a href="#ch6" class="pd">Git</a><a href="#ch7" class="pd">Cloudflare</a>
+        <a href="#ch8" class="pd">FAQ</a><a href="#ch9">术语表</a><a href="#appA">模板库</a>
       </nav>
       <button id="themeBtn" title="切换明暗模式">🌙</button>
     </div>
@@ -429,20 +429,8 @@
       const chH2s = {};
       doc.querySelectorAll('h2').forEach(h => chH2s[h.id] = h);
 
-      /* ch0：目录章（p0 中性色，不加 part 横幅） */
+      /* ch0：目录章（p0 中性色） */
       if (chH2s.ch0) chH2s.ch0.closest('h2') && chH2s.ch0.setAttribute('data-part','p0');
-      /* 正文中的 part 横幅：插在对应章节 h2 之前 */
-      PARTS.forEach((p, pi) => {
-        const first = document.getElementById(p.ids[0]);
-        if (!first) return;
-        const div = document.createElement('div');
-        div.className = 'part-header' + (p.cls === 'p4' ? ' ph-ref' : (pi === 0 ? '' : ''));
-        div.setAttribute('data-part', p.cls);
-        div.innerHTML = (p.text ? '<span class="ph-part">' + p.text + '</span>' : '')
-          + '<span class="ph-name">' + (p.name || p.sub) + '</span>'
-          + (p.name ? '<span class="ph-sub">' + p.sub + '</span>' : '');
-        first.parentNode.insertBefore(div, first);
-      });
 
       /* ===== 章节标题：Part 主题色 + 英文名（不改动内容文字） =====
          h2/h3 自带"第 N 章"/"N.N"编号，不再注入重复编号；
@@ -467,7 +455,7 @@
       const origText = {};                    // 标题 id -> 原始文字（供目录/指示器用）
       doc.querySelectorAll('h2[id], h3[id]').forEach(h => { heads.push(h); origText[h.id] = h.dataset.orig || h.textContent; });
       const aMap = {};
-      let curLv1 = null, lastPart = null;
+      let curLv1 = null;
       doc.querySelectorAll('h2[id], h3[id]').forEach(h => {
         const a = document.createElement('a');
         a.href = '#' + h.id;
@@ -476,16 +464,6 @@
         if (h.tagName === 'H2') {
           const p = partOf[h.id];
           const pc = p ? p.cls : 'p0';
-          if (pc !== lastPart) {
-            lastPart = pc;
-            const ph = document.createElement('div');
-            ph.className = 'toc-part';
-            ph.setAttribute('data-part', pc);
-            ph.textContent = pc === 'p0' ? '总览'
-              : (pc === 'p4' ? '参考与速查'
-                : (pc === 'p1' ? '① 原理与选型' : (pc === 'p2' ? '② 红线与技能' : '③ 工程化支撑')));
-            toc.appendChild(ph);
-          }
           const sec = document.createElement('div');
           sec.className = 'toc-sec';
           sec.setAttribute('data-part', pc);
@@ -527,11 +505,12 @@
         }
         /* 当前所在指示器 */
         let chText = '', secText = '';
-        if (el.classList.contains('lv1')) chText = origText[el.href.slice(1)];
+        const aid = a => (a.getAttribute('href') || '').slice(1);
+        if (el.classList.contains('lv1')) chText = origText[aid(el)];
         else {
           const p = el.closest('.toc-sec');
-          if (p) chText = origText[p.querySelector('a.lv1').href.slice(1)];
-          secText = origText[el.href.slice(1)];
+          if (p) chText = origText[aid(p.querySelector('a.lv1'))];
+          secText = origText[aid(el)];
         }
         const pc = (sec && sec.getAttribute('data-part')) || 'p0';
         curPill.style.setProperty('--pc', 'var(--' + pc + ')');
@@ -552,7 +531,14 @@
       toc.querySelectorAll('a').forEach(a => {
         a.addEventListener('click', e => {
           e.preventDefault();
-          gotoHeading(a.href.slice(1), a.closest('.toc-sec'));
+          const id = (a.getAttribute('href') || '').slice(1);
+          const sec = a.closest('.toc-sec');
+          if (a.classList.contains('lv1') && sec) {
+            sec.classList.toggle('open');      /* 点击章节主标题：展开/折叠 + 跳转 */
+            gotoHeading(id, null);
+          } else {
+            gotoHeading(id, sec);             /* 点击小节：确保父级展开并跳转 */
+          }
         });
       });
       /* 顶栏导航：同样平滑定位 + 高亮 + 展开对应章节 */
@@ -627,11 +613,6 @@
             const g = rows.filter(r => p.ids.includes(r.id));
             if (!g.length) return;
             shown.add(p.cls);
-            const lab = document.createElement('div');
-            lab.className = 'toc-part-label';
-            lab.setAttribute('data-part', p.cls);
-            lab.textContent = p.name ? p.text + ' ' + p.name : p.sub;
-            wrap.appendChild(lab);
             const grid = document.createElement('div');
             grid.className = 'toc-cards';
             g.forEach(r => {
@@ -648,11 +629,6 @@
             wrap.appendChild(grid);
           });
           /* 总览（ch0 自身无卡片） */
-          const lab0 = document.createElement('div');
-          lab0.className = 'toc-part-label';
-          lab0.setAttribute('data-part','p0');
-          lab0.textContent = '总览';
-          wrap.appendChild(lab0);
           const grid0 = document.createElement('div');
           grid0.className = 'toc-cards';
           const a0 = document.createElement('a');
