@@ -477,6 +477,12 @@
       });
       const secs = Array.from(toc.querySelectorAll('.toc-sec'));
       if (secs[0]) secs[0].classList.add('open');   /* 默认展开第一章 */
+      /* 手风琴：自动跟随时只保留当前章节展开，其余自动折叠 */
+      const openOnly = secEl => {
+        if (!secEl || secEl.classList.contains('empty')) return;
+        secs.forEach(s => { if (s !== secEl && s.classList.contains('open')) s.classList.remove('open'); });
+        secEl.classList.add('open');
+      };
 
       /* 点击定位：章节/小节均平滑滚动，并自动展开对应章节的小节；锁定期间滚动跟随不抢高亮 */
       let followLockUntil = 0;
@@ -488,7 +494,7 @@
         if (!el) return;
         el.classList.add('active');
         const sec = el.closest('.toc-sec');
-        if (keepState && sec && !sec.classList.contains('open')) sec.classList.add('open');
+        if (keepState) openOnly(sec);
         if (sb) {
           const top = el.offsetTop, bottom = top + el.offsetHeight;
           if (top < sb.scrollTop + 32 || bottom > sb.scrollTop + sb.clientHeight - 32)
@@ -496,7 +502,7 @@
         }
       };
       const gotoHeading = (id, secEl, keepState) => {
-        if (keepState && secEl && !secEl.classList.contains('open')) secEl.classList.add('open');
+        if (keepState) openOnly(secEl);
         const t = document.getElementById(id);
         if (!t) return;
         lockFollow(900);
@@ -512,6 +518,8 @@
           const sec = a.closest('.toc-sec');
           if (a.classList.contains('lv1') && sec) {
             sec.classList.toggle('open');      /* 点击章节主标题：展开/折叠 + 跳转 */
+            if (sec.classList.contains('open'))
+              secs.forEach(s => { if (s !== sec && s.classList.contains('open')) s.classList.remove('open'); });
             gotoHeading(id, null, false);      /* keepState=false：折叠后保持折叠 */
           } else {
             gotoHeading(id, sec, true);       /* 点击小节：确保父级展开并跳转 */
