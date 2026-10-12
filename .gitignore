@@ -1,13 +1,6 @@
 # 敏感数据与密钥（金融红线：永远不提交）
 .env
-.env.*
-!.env.example
-.dev.vars
-.dev.vars.*
 *.key
-*.pem
-id_rsa
-id_ed25519
 *.p12
 *.pfx
 secrets/
@@ -17,18 +10,10 @@ secrets/
 *.xls
 *.csv
 data/
-raw/
-output/
 *.pdf
 
 # 系统与工具产物
 node_modules/
-.wrangler/
-__pycache__/
-*.pyc
-build/
-dist/
-*.exe
 .agnes/
 # 临时脚本 / 调试产物
 _*.py
@@ -36,7 +21,4 @@ _*.py
 .DS_Store
 Thumbs.db
 
-# 私有审阅材料（保留本地，不随站点发布）
-docs/改善建议书-*.md
-
-# 只提交已审查的公开文档、源码、依赖与合成样例；ignore 不控制 AI 读取或网络上传
+# 仅提交 index.html / index.md / README.md / LICENSE 等公开文档
