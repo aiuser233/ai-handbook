@@ -1,0 +1,13 @@
+{
+  "rows": [
+    {"id": "A", "current_wan": "1200", "previous_wan": "1000", "yoy_pct": "20"},
+    {"id": "B", "current_wan": "5000", "previous_wan": "4000", "yoy_pct": "25"},
+    {"id": "C", "current_wan": null, "previous_wan": "100", "yoy_pct": null},
+    {"id": "D", "current_wan": "10", "previous_wan": "0", "yoy_pct": null}
+  ],
+  "comparable_ids": ["A", "B"],
+  "comparable_current_wan": "6200",
+  "comparable_previous_wan": "5000",
+  "comparable_yoy_pct": "24",
+  "removed_duplicates": 1
+}

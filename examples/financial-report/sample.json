@@ -1,0 +1,10 @@
+{
+  "description": "全部为合成数据；单位与重复记录用于教学，不代表真实企业。",
+  "records": [
+    {"id": "A", "company": "示例公司A", "period": "2025", "unit": "万元", "current": "1200", "previous": "1000", "source": "合成输入 A：营业收入"},
+    {"id": "B", "company": "示例公司B", "period": "2025", "unit": "元", "current": "50000000", "previous": "40000000", "source": "合成输入 B：营业收入"},
+    {"id": "C", "company": "示例公司C", "period": "2025", "unit": "万元", "current": null, "previous": "100", "source": "合成输入 C：本期缺失"},
+    {"id": "D", "company": "示例公司D", "period": "2025", "unit": "万元", "current": "10", "previous": "0", "source": "合成输入 D：上期为零"},
+    {"id": "A", "company": "示例公司A", "period": "2025", "unit": "万元", "current": "1200", "previous": "1000", "source": "合成输入 A：营业收入"}
+  ]
+}
